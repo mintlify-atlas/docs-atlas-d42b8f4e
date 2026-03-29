@@ -1,0 +1,135 @@
+---
+title: 'Managing users'
+description: 'View, edit, and delete user accounts, manage permission levels, and upload profile images.'
+---
+
+<Note>
+  User management requires the **Administrator** permission.
+</Note>
+
+The user list at `/ListaUsuario` gives you a complete view of every registered account in the system. From here you can edit profiles, adjust permissions, and remove accounts.
+
+## Browsing the user list
+
+Navigate to `/ListaUsuario` to see all registered users. Use the `filtro` query parameter (or the filter controls in the UI) to narrow results:
+
+| Filter value | What it shows |
+|---|---|
+| `todos` | All registered users |
+| `Visitante` | Users with Visitor-level access |
+| `Estudiante` | Users with Student-level access |
+| `Administrador` | Users with Administrator access |
+
+The list displays the following fields for each user:
+
+| Field | Description |
+|---|---|
+| `IDusuario` | Unique identifier for the user |
+| `NombreUsuario` | First name |
+| `Apellido` | Last name |
+| `Email` | Contact email address |
+| `Telefono` | Phone number |
+| `Carrera` | Academic program or department |
+| `Rol` | System role (e.g., Estudiante, Administrador) |
+| `Permiso` | Access permission level |
+| `Imagen` | Profile image |
+
+## Editing a user
+
+<Steps>
+  <Step title="Find the user">
+    Go to `/ListaUsuario` and locate the account you want to update.
+  </Step>
+  <Step title="Open the edit form">
+    Navigate to `/EditarUsuario/<IDusuario>`, replacing `<IDusuario>` with the user's ID. All current values are pre-filled.
+  </Step>
+  <Step title="Update the fields">
+    Modify any of the editable fields described below.
+  </Step>
+  <Step title="Save changes">
+    Submit to `/AplicarCambiosUsuario/<IDusuario>`. The user record is updated immediately.
+  </Step>
+</Steps>
+
+### Editable user fields
+
+<ParamField path="body.nombreUsuario" type="string" required>
+  The user's first name.
+</ParamField>
+
+<ParamField path="body.apellido" type="string" required>
+  The user's last name.
+</ParamField>
+
+<ParamField path="body.email" type="string" required>
+  Contact email address. Must be unique in the system.
+</ParamField>
+
+<ParamField path="body.telefono" type="string">
+  Phone number.
+</ParamField>
+
+<ParamField path="body.carrera" type="string">
+  Academic program, major, or department.
+</ParamField>
+
+<ParamField path="body.rol" type="string" required>
+  System role assigned to the user.
+</ParamField>
+
+<ParamField path="body.permiso" type="string" required>
+  Permission level controlling what the user can access. See [Permission levels](#permission-levels) below.
+</ParamField>
+
+<ParamField path="body.imagen" type="string">
+  Profile image filename or path.
+</ParamField>
+
+## Permission levels
+
+<Note>
+  Permissions determine what actions a user can take in the system. The most common escalation path is **Visitante → Estudiante**, which grants the ability to submit and manage loan requests.
+</Note>
+
+| Permission | Description |
+|---|---|
+| `Visitante` | Limited access. Can browse the system but cannot submit loan requests. |
+| `Estudiante` | Standard student access. Can submit loan requests for equipment. |
+| `Administrador` | Full access to all admin routes and management features. |
+
+### How permissions change
+
+There are two ways a user's permission is elevated from `Visitante` to `Estudiante`:
+
+1. **Via an access request** — the user submits a `SolicitudDeAcceso`, and an administrator approves it at `/lista_solicitudes`. Approval automatically sets the user's `Permiso` to `Estudiante`.
+2. **Manual edit** — an administrator opens the user's edit form and sets `Permiso` directly to `Estudiante` (or any other level).
+
+Use the manual edit path when you need to grant access immediately or when correcting an incorrect permission level.
+
+## Deleting a user
+
+<Warning>
+  Deleting a user is irreversible. The system performs a **cascade delete**: all observations and loan requests associated with the user are permanently removed before the user record is deleted.
+</Warning>
+
+<Steps>
+  <Step title="Locate the user account">
+    Find the user in `/ListaUsuario`.
+  </Step>
+  <Step title="Initiate deletion">
+    Navigate to `/EliminarUsuario/<IDusuario>`. The deletion executes immediately with no confirmation step.
+  </Step>
+  <Step title="Verify removal">
+    Return to `/ListaUsuario` to confirm the account no longer appears.
+  </Step>
+</Steps>
+
+## Uploading profile images
+
+The user edit form includes a profile image upload control. When you upload an image:
+
+- The file is saved to `static/uploads/Usuarios/` and the path is stored in the `Imagen` column of `usuario`.
+- Accepted formats: `.jpg`, `.jpeg`, `.png`. Other formats are rejected with an error message.
+- Maximum file size: **2 MB**.
+- Images are automatically resized to fit within 800×800 pixels and re-saved as JPEG.
+- To replace an existing profile image, open the edit form and upload a new file. The previous path reference is overwritten.

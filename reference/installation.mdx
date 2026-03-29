@@ -1,0 +1,178 @@
+---
+title: 'Installation'
+description: 'Set up PrestamoEquipo locally on your machine.'
+---
+
+## Prerequisites
+
+Before you begin, make sure you have the following installed:
+
+- **Python 3.x** and **pip**
+- **Microsoft SQL Server** or **SQL Server Express**
+- **ODBC Driver for SQL Server**
+
+<Note>
+  The ODBC driver is required for `pyodbc` to connect to SQL Server. On Windows, install [Microsoft ODBC Driver 17 for SQL Server](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server). On Linux/macOS, follow the platform-specific installation guide from Microsoft.
+</Note>
+
+## Setup
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/eduardoestradadada/PrestamoEquipo.git
+    cd PrestamoEquipo
+    ```
+  </Step>
+
+  <Step title="Create and activate a virtual environment">
+    <CodeGroup>
+
+    ```bash Windows
+    python -m venv venv
+    venv\Scripts\activate
+    ```
+
+    ```bash macOS/Linux
+    python -m venv venv
+    source venv/bin/activate
+    ```
+
+    </CodeGroup>
+  </Step>
+
+  <Step title="Install dependencies">
+    ```bash
+    pip install flask flask-wtf flask-login pyodbc werkzeug
+    ```
+  </Step>
+
+  <Step title="Create the database">
+    Open SQL Server Management Studio (or your preferred SQL client) and create a database named `sistema_de_prestamo`. Then create the required tables. The column names below reflect the actual columns queried by the application:
+
+    ```sql
+    CREATE TABLE usuario (
+        IDusuario   INT PRIMARY KEY IDENTITY,
+        NombreUsuario NVARCHAR(100),
+        Password    NVARCHAR(255),
+        Apellido    NVARCHAR(100),
+        Carrera     NVARCHAR(100),
+        Telefono    NVARCHAR(20),
+        Rol         NVARCHAR(50),
+        Email       NVARCHAR(100),
+        Permiso     NVARCHAR(50) DEFAULT 'Visitante',
+        Imagen      NVARCHAR(255)
+    );
+
+    CREATE TABLE equiposLab (
+        IDequipo             INT PRIMARY KEY IDENTITY,
+        Nombre               NVARCHAR(100),
+        Descripción          NVARCHAR(500),
+        Estado               NVARCHAR(50) DEFAULT 'Disponible',
+        FechaDeAdquisición   DATE,
+        Ubicación            NVARCHAR(200),
+        Imagen               NVARCHAR(255),
+        UltimaActualizacion  DATETIME,
+        Tipo                 NVARCHAR(100),
+        CI                   NVARCHAR(50),
+        NumeroDeInventario   NVARCHAR(50),
+        DescripcionTecnica   NVARCHAR(1000),
+        Marca                NVARCHAR(100),
+        Modelo               NVARCHAR(100),
+        NumeroDeSerie        NVARCHAR(100),
+        Mantos_Anuales       INT
+    );
+
+    CREATE TABLE CarritoPedidos (
+        CarritoID  INT PRIMARY KEY IDENTITY,
+        IDusuario  INT REFERENCES usuario(IDusuario),
+        estado     NVARCHAR(50) DEFAULT 'En Carrito'
+    );
+
+    CREATE TABLE EquiposCarrito (
+        CarritoID  INT REFERENCES CarritoPedidos(CarritoID),
+        IDequipo   INT REFERENCES equiposLab(IDequipo),
+        quantity   INT DEFAULT 1,
+        PRIMARY KEY (CarritoID, IDequipo)
+    );
+
+    CREATE TABLE solicitudesPrestamo (
+        IDsolicitud       INT PRIMARY KEY IDENTITY,
+        IDequipo          INT REFERENCES equiposLab(IDequipo),
+        NombreEquipo      NVARCHAR(100),
+        IDusuario         INT REFERENCES usuario(IDusuario),
+        NombreUsuario     NVARCHAR(200),
+        FechaSolicitud    DATE,
+        Motivo            NVARCHAR(500),
+        FechaInicio       DATE,
+        FechaEntrega      DATE,
+        Estado            NVARCHAR(50) DEFAULT 'pendiente',
+        Profesor          NVARCHAR(100),
+        Materia           NVARCHAR(100),
+        FechaDeActivacion DATE,
+        FechaDev          DATE
+    );
+
+    CREATE TABLE SolicitudesDeAcceso (
+        IDsolicitudAcceso   INT PRIMARY KEY IDENTITY,
+        IDusuario           INT REFERENCES usuario(IDusuario),
+        NombreUsuario       NVARCHAR(200),
+        Motivo              NVARCHAR(500),
+        Estado              NVARCHAR(50) DEFAULT 'Acceso',
+        FechaDeActivacion   DATE
+    );
+
+    CREATE TABLE observacionesEquipos (
+        idEquipo   INT REFERENCES equiposLab(IDequipo),
+        IDusuario  INT REFERENCES usuario(IDusuario)
+    );
+    ```
+  </Step>
+
+  <Step title="Configure the database connection">
+    Open `database/db.py` and update the `SERVER` value to match your SQL Server instance name:
+
+    ```python database/db.py
+    db = pyodbc.connect(
+        'DRIVER={SQL Server};'
+        'SERVER=YOUR_SERVER_NAME\\SQLEXPRESS;'  # Update this
+        'DATABASE=sistema_de_prestamo;'
+        'Trusted_Connection=yes;'
+    )
+    ```
+
+    Replace `YOUR_SERVER_NAME\\SQLEXPRESS` with your actual SQL Server instance. The default in the source is `EQUIPO2\SQLEXPRESS`.
+  </Step>
+
+  <Step title="Run the application">
+    ```bash
+    python app.py
+    ```
+  </Step>
+
+  <Step title="Access the app">
+    Open your browser and navigate to:
+
+    ```
+    http://127.0.0.1:5000
+    ```
+  </Step>
+
+  <Step title="Create the first admin account">
+    New user registrations default to the `Visitante` permission level. To create an administrator, first register a normal account through the app, then promote it directly in the database:
+
+    ```sql
+    UPDATE usuario
+    SET Permiso = 'Administrador'
+    WHERE Email = 'your-admin-email@example.com';
+    ```
+
+    <Note>
+      Passwords are hashed using Werkzeug. Generate a hash in Python before inserting: `from werkzeug.security import generate_password_hash; print(generate_password_hash('your-password'))`.
+    </Note>
+  </Step>
+</Steps>
+
+<Warning>
+  The `SECRET_KEY` values in `app.py` and `config.py` are hardcoded and must be replaced before deploying to any non-local environment. Use a long, randomly generated string and load it from an environment variable. See the [configuration reference](/reference/configuration) for details.
+</Warning>

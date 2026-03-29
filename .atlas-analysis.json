@@ -1,0 +1,103 @@
+{
+  "projectType": "saas",
+  "projectName": "PrestamoEquipo",
+  "projectDescription": "A web-based laboratory equipment loan management system for the Biomedical Engineering lab, allowing students to browse, request, and track equipment loans while administrators manage inventory and approvals.",
+  "theme": "almond",
+  "primaryColor": "#2563EB",
+  "lightColor": "#DBEAFE",
+  "darkColor": "#1E3A8A",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Guide",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "introduction",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "User Features",
+            "pages": [
+              "guides/registration-and-access",
+              "guides/browsing-catalog",
+              "guides/requesting-equipment",
+              "guides/cart-and-checkout",
+              "guides/managing-loans"
+            ]
+          },
+          {
+            "group": "Administration",
+            "pages": [
+              "guides/admin-dashboard",
+              "guides/managing-inventory",
+              "guides/managing-users",
+              "guides/approving-requests"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Technical Reference",
+        "groups": [
+          {
+            "group": "Architecture",
+            "pages": [
+              "reference/architecture",
+              "reference/database-schema",
+              "reference/permissions"
+            ]
+          },
+          {
+            "group": "Setup & Deployment",
+            "pages": [
+              "reference/installation",
+              "reference/configuration"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Role-based access control with Visitor, Student, and Administrator permission levels",
+    "Equipment catalog with availability filtering and status tracking",
+    "Shopping cart system for batching equipment loan requests",
+    "Individual equipment loan requests with start/end dates, professor, and subject fields",
+    "Admin dashboard with real-time statistics on active loans, pending requests, and available equipment",
+    "Full inventory management: add, edit, and delete lab equipment with image uploads",
+    "User management: view, edit permissions, and remove users",
+    "Loan history tracking with filterable records",
+    "Access request workflow for visitors to gain student-level permissions"
+  ],
+  "publicApiSurface": [
+    "GET /login — User authentication page",
+    "POST /login — Submit credentials",
+    "GET /register — Registration page",
+    "POST /register — Create new account",
+    "GET /logout — End session",
+    "GET /Catalogo — Browse available equipment",
+    "GET /solicitar/<IDequipo> — Equipment loan request form",
+    "POST /enviar_solicitud — Submit loan request",
+    "GET /agregar-carrito/<IDequipo> — Add equipment to cart",
+    "GET /quitar-carrito/<IDequipo> — Remove equipment from cart",
+    "GET /Carrito — View cart contents",
+    "GET /solicitar_todo_carrito — Submit all cart items as request",
+    "GET /cancelar_solicitud_carrito — Cancel pending cart request",
+    "GET /perfilUsuario — View user profile and loan history",
+    "GET /Editar/<solicitud_id> — Edit pending loan request",
+    "POST /ActualizarSolicitud — Save loan request changes",
+    "GET /Cancelar/<solicitud_id> — Cancel a loan request",
+    "GET /Devolver/<solicitud_id> — Mark equipment as returned",
+    "GET /solicitarAccesoMenu — Access upgrade request page",
+    "POST /SolicitarAcceso — Submit access upgrade request",
+    "GET /home — Admin dashboard",
+    "GET /lista_Pedidos — Active loans list (admin)",
+    "GET /lista_solicitudes — Pending loan requests (admin)",
+    "GET /Inventario — Equipment inventory (admin)",
+    "GET /ListaUsuario — User list (admin)",
+    "GET /Historial — Loan history (admin)"
+  ]
+}

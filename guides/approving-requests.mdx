@@ -1,0 +1,119 @@
+---
+title: 'Approving requests'
+description: 'Review and act on pending loan requests and access upgrade requests from the requests list.'
+---
+
+<Note>
+  Request management requires the **Administrator** permission.
+</Note>
+
+The requests list at `/lista_solicitudes` shows two types of pending items: **loan requests** from students who want to borrow equipment, and **access upgrade requests** from visitors who want student-level access. Both are handled from the same page.
+
+<Tabs>
+  <Tab title="Loan requests">
+
+## Reviewing loan requests
+
+The pending loan requests section shows all `Solicitudes` with `Estado = 'pendiente'`. Each entry displays the requested equipment and the requesting user.
+
+### Approving a loan request
+
+<Steps>
+  <Step title="Open the requests list">
+    Navigate to `/lista_solicitudes` and locate the pending loan request you want to approve.
+  </Step>
+  <Step title="Approve the request">
+    Navigate to `/Aceptar/<IDequipo>/<IDsolicitud>`, replacing the placeholders with the equipment ID and solicitud ID.
+
+    The system performs two updates atomically:
+    - Sets the solicitud `Estado` to `'activo'` and records today's date as `FechaDeActivacion`.
+    - Sets the equipment `Estado` to `'En uso'`.
+  </Step>
+  <Step title="Confirm the loan is active">
+    Go to `/lista_Pedidos` to see the loan listed under active loans. The equipment is no longer available for new requests until this loan is closed.
+  </Step>
+</Steps>
+
+<Note>
+  Approving a loan immediately marks the equipment as `En uso`. The equipment will not appear as available in the inventory until the loan is closed.
+</Note>
+
+### Rejecting a loan request
+
+<Steps>
+  <Step title="Open the requests list">
+    Navigate to `/lista_solicitudes` and find the request to reject.
+  </Step>
+  <Step title="Reject the request">
+    Navigate to `/Borrar/<IDsolicitud>`. The solicitud `Estado` is set to `'eliminado'`. The equipment status is not changed — it remains `Disponible`.
+  </Step>
+</Steps>
+
+## Managing active loans
+
+Active loans are visible at `/lista_Pedidos`. Each entry shows the equipment on loan and the borrowing user.
+
+### Closing an active loan
+
+<Steps>
+  <Step title="Open the active loans list">
+    Navigate to `/lista_Pedidos` and find the loan you want to close.
+  </Step>
+  <Step title="Close the loan">
+    Navigate to `/delete/<IDequipo>/<IDsolicitud>`, replacing the placeholders with the equipment ID and solicitud ID.
+
+    The system performs two updates:
+    - Sets the solicitud `Estado` to `'eliminado'`.
+    - Sets the equipment `Estado` back to `'Disponible'`.
+  </Step>
+  <Step title="Confirm the equipment is available">
+    Return to `/Inventario` or the dashboard counter to verify the equipment is listed as `Disponible` again.
+  </Step>
+</Steps>
+
+  </Tab>
+  <Tab title="Access requests">
+
+## Reviewing access upgrade requests
+
+The access requests section of `/lista_solicitudes` shows all `SolicitudesDeAcceso` that are pending review. These come from users registered as `Visitante` who have submitted a request to be upgraded to `Estudiante` level.
+
+### Approving an access request
+
+<Steps>
+  <Step title="Open the requests list">
+    Navigate to `/lista_solicitudes` and find the access request under the access upgrade section.
+  </Step>
+  <Step title="Approve the request">
+    Navigate to `/AceptarAcceso/<IDsolicitud>`, replacing `<IDsolicitud>` with the solicitud ID.
+
+    The system performs two updates:
+    - Sets the `SolicitudDeAcceso` `Estado` to `'Aprobado'` and records today's date.
+    - Sets the associated user's `Permiso` to `'Estudiante'`.
+  </Step>
+  <Step title="Verify the permission change">
+    Go to `/ListaUsuario` and find the user. Their `Permiso` field should now show `Estudiante`.
+  </Step>
+</Steps>
+
+<Note>
+  Once approved, the user immediately gains student-level access and can submit loan requests for equipment. No further steps are required.
+</Note>
+
+### Rejecting an access request
+
+<Steps>
+  <Step title="Open the requests list">
+    Navigate to `/lista_solicitudes` and find the access request to reject.
+  </Step>
+  <Step title="Reject the request">
+    Navigate to `/RechazarAcceso/<IDsolicitud>`. The `SolicitudDeAcceso` `Estado` is set to `'Rechazado'`. The user's `Permiso` is not changed — they remain a `Visitante`.
+  </Step>
+</Steps>
+
+<Tip>
+  If you need to grant access to a user without going through the request workflow, you can manually set their `Permiso` to `Estudiante` by editing their profile at `/EditarUsuario/<IDusuario>`. See [Managing users](/guides/managing-users) for details.
+</Tip>
+
+  </Tab>
+</Tabs>

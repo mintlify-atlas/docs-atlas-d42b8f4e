@@ -1,0 +1,67 @@
+---
+title: 'Requesting equipment'
+description: 'Submit a loan request for a single item directly from the catalog.'
+---
+
+## Overview
+
+Individual loan requests let you borrow one piece of equipment at a time. The request goes to an administrator for approval before the loan is active.
+
+<Note>
+  You must have `Estudiante` or `Administrador` permission to submit requests. If your account is still `Visitante`, see [Registration and access](/guides/registration-and-access) to request an upgrade.
+</Note>
+
+## Submit a loan request
+
+<Steps>
+  <Step title="Find an available item">
+    Open the catalog at `/Catalogo` and locate the item you want. Only equipment with `Disponible` status can be requested. Items marked `En uso` are unavailable until returned by the current borrower.
+  </Step>
+  <Step title="Open the request form">
+    Click **Request** on the equipment card. This navigates to `/solicitar/<IDequipo>`, where `<IDequipo>` is the unique identifier of that item.
+  </Step>
+  <Step title="Fill in the loan request form">
+    Complete all fields before submitting:
+
+    <ParamField body="motivo" type="string" required>
+      The reason you need to borrow this equipment. Be specific — administrators use this to evaluate your request.
+    </ParamField>
+
+    <ParamField body="fecha_inicio" type="string" required>
+      The date you need the equipment from. Use the date picker or enter the date in the required format.
+    </ParamField>
+
+    <ParamField body="fecha_entrega" type="string" required>
+      The date by which you will return the equipment.
+    </ParamField>
+
+    <ParamField body="profesor" type="string" required>
+      The name of the professor supervising the activity for which you need the equipment.
+    </ParamField>
+
+    <ParamField body="materia" type="string" required>
+      The subject or course the loan is associated with.
+    </ParamField>
+  </Step>
+  <Step title="Submit the request">
+    Click **Send request**. The form posts to `POST /enviar_solicitud` along with the `equipo_id` of the selected item.
+  </Step>
+  <Step title="Wait for approval">
+    Your request is now in **Pendiente** (pending) state. An administrator will review it and either approve or reject it. You can track the status from your profile at `/perfilUsuario`.
+  </Step>
+</Steps>
+
+## Availability requirement
+
+<Warning>
+  If the equipment you selected becomes `En uso` between when you opened the form and when you submitted it, the request will be rejected. Return to the catalog and check availability before trying again.
+</Warning>
+
+## After submission
+
+Once submitted, your request appears in the **Solicitudes pendientes** section of your profile. From there you can:
+
+- **Edit** the request details before an administrator acts on it
+- **Cancel** the request if you no longer need the item
+
+See [Managing loans](/guides/managing-loans) for details on both actions.

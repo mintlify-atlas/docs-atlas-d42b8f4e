@@ -1,0 +1,106 @@
+---
+title: 'Managing loans'
+description: 'Track your loan history, edit or cancel pending requests, return equipment, and update your profile.'
+---
+
+## Your profile and loan history
+
+All of your loan activity is available at `/perfilUsuario`. The page is divided into three sections based on request state.
+
+<Tabs>
+  <Tab title="Pending requests">
+    Requests that have been submitted and are waiting for an administrator decision. From here you can:
+
+    - **Edit** the request details while no decision has been made
+    - **Cancel** the request to withdraw it entirely
+
+    A request stays in this section until an administrator approves or rejects it, or until you cancel it.
+  </Tab>
+  <Tab title="Active loans">
+    Requests that have been approved. The equipment has been issued and is currently in your possession. From here you can:
+
+    - **Return** the equipment once you have finished using it
+
+    A loan stays in this section until you mark it as returned.
+  </Tab>
+  <Tab title="Rejected requests">
+    Requests that an administrator has declined. From here you can:
+
+    - **Delete** the entry to remove it from your history once you have noted the reason
+
+    Rejected requests cannot be resubmitted directly. If you still need the equipment, create a new request from the catalog.
+  </Tab>
+</Tabs>
+
+## Edit a pending request
+
+You can update the details of any request that has not yet been acted on by an administrator.
+
+<Steps>
+  <Step title="Open the edit form">
+    Navigate to `/Editar/<solicitud_id>`, where `<solicitud_id>` is the ID of the request you want to change. You can also click **Edit** next to the request in the pending section of `/perfilUsuario`.
+  </Step>
+  <Step title="Update the fields">
+    Any of the following fields can be changed:
+
+    | Field          | Description                                      |
+    | -------------- | ------------------------------------------------ |
+    | `motivo`       | Reason for the loan                              |
+    | `fecha_inicio` | Start date of the loan period                    |
+    | `fecha_entrega`| Date by which equipment will be returned         |
+    | `profesor`     | Supervising professor                            |
+    | `materia`      | Associated subject or course                     |
+  </Step>
+  <Step title="Save changes">
+    Submit the form. The update is sent to `POST /ActualizarSolicitud` along with the `solicitud_id`. The request remains in `Pendiente` state with the updated details.
+  </Step>
+</Steps>
+
+<Note>
+  Once an administrator approves or rejects a request, it can no longer be edited. Edit the request before any administrator action is taken.
+</Note>
+
+## Cancel a pending request
+
+To withdraw a request that has not yet been reviewed, navigate to `/Cancelar/<solicitud_id>`. The request is removed from the pending queue immediately.
+
+## Return equipment
+
+When you have finished using a loan, mark it as returned so the equipment becomes available for other users.
+
+<Steps>
+  <Step title="Go to your profile">
+    Open `/perfilUsuario` and locate the loan in the **Active loans** section.
+  </Step>
+  <Step title="Initiate the return">
+    Click **Return** next to the loan, or navigate directly to `/Devolver/<solicitud_id>`.
+  </Step>
+  <Step title="Confirm">
+    The system marks the loan as returned and updates the equipment status to `Disponible`. The entry moves out of your active loans section.
+  </Step>
+</Steps>
+
+<Warning>
+  Only return equipment after you have physically handed it back. Marking a loan as returned before the equipment is returned will free it up for other users to request, even though you still have it.
+</Warning>
+
+## Delete a rejected request
+
+Rejected requests stay visible in your profile until you remove them. To delete one, navigate to `/Eliminar/<solicitud_id>`. The entry is permanently removed from your history.
+
+## Edit your profile
+
+You can update your personal information at `/editar_perfil` (or submit changes to `POST /editar_perfil`). The following fields are editable:
+
+| Field     | Description                         |
+| --------- | ----------------------------------- |
+| `nombre`  | First name                          |
+| `apellido`| Last name                           |
+| `carrera` | Academic program or career          |
+| `telefono`| Contact phone number                |
+| `email`   | Email address used to log in        |
+| `imagen`  | Profile picture                     |
+
+<Note>
+  Changing your email address updates the credentials you use to log in. Make sure the new address is one you have access to.
+</Note>

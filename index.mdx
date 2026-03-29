@@ -1,97 +1,55 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "PrestamoEquipo"
+description: "Web-based laboratory equipment loan management system for the Biomedical Engineering lab"
 ---
 
-## Setting up
+PrestamoEquipo is the equipment loan management platform for the Biomedical Engineering laboratory. Students can browse available equipment, submit loan requests, and track their active loans — while administrators manage inventory, approve requests, and monitor lab activity from a central dashboard.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Get started" icon="rocket" href="/quickstart">
+    Create your account and make your first equipment loan request in minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Browse the catalog" icon="flask" href="/guides/browsing-catalog">
+    Discover available lab equipment and filter by availability status.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Request equipment" icon="clipboard-list" href="/guides/requesting-equipment">
+    Submit individual loan requests or batch multiple items using the cart.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Admin dashboard" icon="chart-bar" href="/guides/admin-dashboard">
+    Monitor active loans, pending requests, and lab inventory at a glance.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## How it works
 
-Everything you need to create world-class documentation.
+<Steps>
+  <Step title="Create an account">
+    Register with your name, email, career, and phone number. New accounts start as **Visitors** with read-only access to the catalog.
+  </Step>
+  <Step title="Request access">
+    Submit an access upgrade request with your identification document. Once approved by an administrator, your account is upgraded to **Student** level, allowing you to make loan requests.
+  </Step>
+  <Step title="Browse and request equipment">
+    Browse the equipment catalog, filter by availability, and submit loan requests specifying your start date, return date, professor, and subject.
+  </Step>
+  <Step title="Track your loans">
+    View all your pending, active, and completed loan requests from your user profile. Return equipment when you're done, or edit pending requests as needed.
+  </Step>
+</Steps>
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+## For administrators
 
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<CardGroup cols={2}>
+  <Card title="Manage inventory" icon="boxes-stacking" href="/guides/managing-inventory">
+    Add, edit, and remove lab equipment with full technical specifications.
+  </Card>
+  <Card title="Approve requests" icon="check-circle" href="/guides/approving-requests">
+    Review and approve or reject pending loan and access requests.
+  </Card>
+  <Card title="Manage users" icon="users" href="/guides/managing-users">
+    View and update user permissions and account details.
+  </Card>
+  <Card title="Loan history" icon="clock-rotate-left" href="/guides/admin-dashboard">
+    Review the full history of all equipment loans with filtering options.
+  </Card>
+</CardGroup>

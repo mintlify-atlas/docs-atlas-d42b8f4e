@@ -1,0 +1,131 @@
+---
+title: 'Configuration'
+description: 'All configurable settings for the PrestamoEquipo application.'
+---
+
+## Database connection
+
+Configured in `database/db.py` via the `pyodbc` connection string.
+
+<ParamField path="DRIVER" type="string" required default="{SQL Server}">
+  The ODBC driver name used to connect to SQL Server. Must match a driver installed on the host machine.
+
+  Common values:
+  - `{SQL Server}` — bundled Windows driver, works on most Windows systems
+  - `{ODBC Driver 17 for SQL Server}` — recommended for newer installations and cross-platform use
+  - `{ODBC Driver 18 for SQL Server}` — latest version; requires `Encrypt=no;` or a valid certificate
+</ParamField>
+
+<ParamField path="SERVER" type="string" required default="EQUIPO2\SQLEXPRESS">
+  The SQL Server instance name. Use the format `HOSTNAME\INSTANCE` for named instances, or just `HOSTNAME` for default instances.
+</ParamField>
+
+<ParamField path="DATABASE" type="string" required default="sistema_de_prestamo">
+  The name of the SQL Server database to connect to.
+</ParamField>
+
+<ParamField path="Trusted_Connection" type="string" default="yes">
+  Enables Windows Authentication when set to `yes`. The application runs as the current Windows user, and no username or password is required.
+
+  To use SQL Server authentication instead, remove this parameter and add `UID` and `PWD`:
+
+  ```python database/db.py
+  db = pyodbc.connect(
+      'DRIVER={ODBC Driver 17 for SQL Server};'
+      'SERVER=YOUR_SERVER\\SQLEXPRESS;'
+      'DATABASE=sistema_de_prestamo;'
+      'UID=your_sql_username;'
+      'PWD=your_sql_password;'
+  )
+  ```
+</ParamField>
+
+<Tip>
+  Windows Authentication (`Trusted_Connection=yes`) is simpler for local development on Windows. For deployments on Linux, macOS, or shared servers, switch to SQL Server authentication with `UID` and `PWD`.
+</Tip>
+
+---
+
+## Application settings
+
+Configured in `config.py` and `app.py`.
+
+<ParamField path="SECRET_KEY" type="string" required>
+  The secret key used by Flask to sign session cookies and CSRF tokens. Two keys exist in the codebase — one in `app.py` and one in `config.py` (via `Config`). The `DevelopmentConfig` inherits from `Config`, so the effective key is whichever is set last.
+
+  **This must be changed before any non-local deployment.**
+
+  Generate a secure key:
+
+  ```python
+  import secrets
+  print(secrets.token_hex(32))
+  ```
+
+  Load it from an environment variable in production:
+
+  ```python config.py
+  import os
+
+  class Config:
+      SECRET_KEY = os.environ.get('SECRET_KEY') or 'fallback-only-for-dev'
+  ```
+</ParamField>
+
+<ParamField path="DEBUG" type="boolean" default="True">
+  Enables Flask debug mode. Defined in `DevelopmentConfig` in `config.py`.
+
+  Debug mode enables the interactive debugger and automatic reloader but **must be set to `False` in production** — it exposes internal code and allows arbitrary Python execution on error pages.
+
+  ```python config.py
+  class DevelopmentConfig(Config):
+      DEBUG = False  # Set to False for production
+  ```
+</ParamField>
+
+<Warning>
+  Running with `DEBUG = True` in a publicly accessible environment is a critical security risk. The Werkzeug debugger allows arbitrary code execution in the browser if an unhandled exception occurs.
+</Warning>
+
+---
+
+## File uploads
+
+Equipment and user images are stored in the `static/uploads/` directory.
+
+<ParamField path="static/uploads/equipos/" type="string">
+  Directory for equipment images. Files are saved here when the `flag` parameter passed to `AdminConsult.guardar_imagen()` targets equipment records.
+</ParamField>
+
+<ParamField path="static/uploads/Usuarios/" type="string">
+  Directory for user profile images. Files are saved here when `flag` targets user records.
+</ParamField>
+
+Supported formats: `.jpg`, `.jpeg`, `.png`. Other formats are rejected. Maximum file size is **2 MB**. Images are resized to 800×800 pixels and re-encoded as JPEG at quality 85 by `AdminConsult.guardar_imagen()` before saving.
+
+<Note>
+  The `static/uploads/` directories must exist before the application attempts to save files. Create them manually if they are absent after cloning:
+
+  ```bash
+  mkdir -p static/uploads/equipos static/uploads/Usuarios
+  ```
+</Note>
+
+---
+
+## Permission levels
+
+User permissions are stored in the `Permiso` column of the `usuario` table.
+
+| Level | How it is assigned | Access |
+|---|---|---|
+| `Visitante` | Default for all new self-registrations | Limited — pending access approval |
+| `Administrador` | Must be set manually in the database | Full admin panel access |
+
+There is no in-app UI to promote a user to `Administrador`. This must be done with a direct database update:
+
+```sql
+UPDATE usuario
+SET Permiso = 'Administrador'
+WHERE Email = 'target-user@example.com';
+```

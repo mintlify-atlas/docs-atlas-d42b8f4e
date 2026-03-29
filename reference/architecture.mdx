@@ -1,0 +1,155 @@
+---
+title: 'Architecture'
+description: 'Technical overview of the PrestamoEquipo stack, blueprint structure, session model, and security mechanisms.'
+---
+
+PrestamoEquipo is a Flask web application that manages laboratory equipment loans. It follows an MVC-style pattern with three route blueprints, a pyodbc-backed SQL Server database, and server-side session state.
+
+## Tech stack
+
+<CardGroup cols={3}>
+  <Card title="Flask" icon="flask">
+    Python web framework. Handles routing, request context, and Jinja2 template rendering.
+  </Card>
+  <Card title="SQL Server Express" icon="database">
+    Relational database accessed via `pyodbc`. Connection uses Windows Trusted Authentication (no credentials in code).
+  </Card>
+  <Card title="flask-login" icon="user">
+    Manages user sessions. The `@login_required` decorator protects routes, and `LoginManager` reloads the user object from the database on each request.
+  </Card>
+  <Card title="flask-wtf" icon="shield">
+    Provides CSRF protection. `CSRFProtect` is initialized globally and validates the `csrf_token` field on every POST request.
+  </Card>
+  <Card title="werkzeug" icon="lock">
+    Password hashing via `generate_password_hash` and `check_password_hash`. Raw passwords are never stored.
+  </Card>
+  <Card title="Jinja2" icon="code">
+    HTML templating engine bundled with Flask. Templates inherit from a base layout and receive context variables from route handlers.
+  </Card>
+</CardGroup>
+
+## Blueprint architecture
+
+The application registers three blueprints in `create_app()`. Each blueprint owns a distinct area of functionality.
+
+| Blueprint | Prefix | Responsibility |
+|-----------|--------|---------------|
+| `auth_bp` | *(root)* | Authentication, user profile, loan lifecycle actions |
+| `admin_bp` | *(root)* | Admin dashboard, inventory CRUD, user management, request approval |
+| `equipos_bp` | *(root)* | Equipment catalog, shopping cart, loan requests, access requests |
+
+### auth_bp — authentication and user self-service
+
+Handles login, registration, logout, profile viewing and editing, and the loan actions that belong to the logged-in user: cancelling, returning, and deleting their own loans.
+
+```
+/login               GET/POST   Show login form / authenticate and start session
+/register            GET/POST   Show registration form / create new account (Visitante role)
+/logout              GET        End session
+/perfilUsuario       GET        View own profile and loan history
+/editar_perfil       GET/POST   Show edit form / update profile fields
+/Editar/<id>         GET        Load loan edit form
+/ActualizarSolicitud POST       Save loan edits
+/Cancelar/<id>       GET        Cancel a pending loan
+/Devolver/<id>       GET        Mark equipment as returned (Estado → 'Concluido')
+/Eliminar/<id>       GET        Delete a loan record
+/Carrito             GET        View shopping cart
+/solicitar_todo_carrito      GET  Submit all cart items as pending request
+/cancelar_solicitud_carrito  GET  Revert cart status from 'Pendiente' to 'En Carrito'
+```
+
+### admin_bp — administration
+
+Restricted to users with `Permiso = 'Administrador'`. Provides the management dashboard and all CRUD operations on inventory, users, and loan/access requests.
+
+```
+/home                GET    Admin dashboard with live stat counters
+/lista_Pedidos       GET    Active loans (Estado = 'activo')
+/lista_solicitudes   GET    Pending loan requests + access upgrade requests
+/Inventario          GET    Full equipment inventory with filters
+/ListaUsuario        GET    All registered users with filters
+/Historial           GET    Complete loan history with filters
++ CRUD routes for equipment, users, and request approval
+```
+
+### equipos_bp — catalog and requests
+
+Available to authenticated users. Lets students browse equipment, manage their cart, and submit loan requests.
+
+```
+/Catalogo                GET   Browse equipment catalog
+/agregar-carrito/<id>    POST  Add item to cart
+/quitar-carrito/<id>     POST  Remove item from cart
+/solicitar/<id>          GET   Loan request form for single item
+/enviar_solicitud        POST  Submit single-item loan request
+/solicitarAccesoMenu     GET   Access upgrade info page
+/SolicitarAcceso         POST  Submit access upgrade request
+```
+
+## MVC-style request flow
+
+```
+Browser request
+      │
+      ▼
+  Blueprint route handler (routes/)
+      │  reads/writes via
+      ▼
+  Model layer (models/)
+      │  executes SQL via
+      ▼
+  pyodbc connection (database/db.py)
+      │
+      ▼
+  SQL Server Express
+```
+
+Route handlers call static methods on model classes (e.g. `ModelUser.get_by_id(db, id)`). Models return entity objects or raw data. No ORM is used — all queries are hand-written SQL executed through `pyodbc`.
+
+## Session data
+
+After a successful login, the following values are written to the Flask server-side session:
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `user_id` | int | Primary key of the authenticated user |
+| `Carrito_ID` | int | ID of the user's active shopping cart |
+| `nombre` | str | First name, used in the UI header |
+| `apellido` | str | Last name |
+| `permiso` | str | Role string: `'Visitante'`, `'Estudiante'`, or `'Administrador'` |
+| `carrito_count` | int | Number of items currently in the cart |
+
+`permiso` is read by the `@verificar_permiso` decorator on every protected request. The session is signed using the `SECRET_KEY` configured in `app.config`.
+
+## Security
+
+### CSRF protection
+
+`CSRFProtect` from `flask-wtf` is initialized at application startup and applies globally. Every HTML form that submits via POST must include the hidden `csrf_token` field. Requests missing a valid token receive a 400 response before the route handler runs.
+
+### Password hashing
+
+Passwords are hashed with werkzeug before storage and never stored in plaintext.
+
+```python
+# Registration
+hashed = User.hash_password(raw_password)          # generate_password_hash
+
+# Login verification
+valid = User.check_password(stored_hash, raw_input) # check_password_hash
+```
+
+The default hasher is PBKDF2-HMAC-SHA256 with a random salt, which werkzeug selects automatically.
+
+### Permission enforcement
+
+Route handlers that require a specific role apply the `@verificar_permiso` decorator:
+
+```python
+@admin_bp.route('/Inventario')
+@verificar_permiso('Administrador')
+def inventario():
+    ...
+```
+
+If `session['permiso']` is not in the allowed roles list, the decorator returns HTTP 403 before the handler executes. See [Permissions](/reference/permissions) for the full role model.

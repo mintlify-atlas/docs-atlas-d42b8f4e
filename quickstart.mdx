@@ -1,80 +1,135 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: 'Quickstart'
+description: 'Register an account, request student access, and submit your first equipment loan request.'
+keywords: ['quickstart', 'register', 'loan request', 'student access', 'equipment catalog']
 ---
 
-## Get started in three steps
+This guide walks you through every step from creating an account to submitting your first equipment loan request.
 
-Get your documentation site running locally and make your first customization.
+<Info>
+  You need a Estudiante (Student) role to submit loan requests. New accounts start as Visitante (Visitor) and must request an upgrade. Steps 3 and 4 below cover this process.
+</Info>
 
-### Step 1: Set up your local environment
+<Steps>
+  <Step title="Go to the login page">
+    Open your browser and navigate to `/login`.
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    If you already have an account, enter your email and password to sign in and skip to step 5. Otherwise, continue to step 2 to register.
+  </Step>
 
-### Step 2: Deploy your changes
+  <Step title="Register a new account">
+    From the login page, follow the link to `/register` and fill in the registration form.
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    | Field | Description |
+    |---|---|
+    | `nombre` | Your first name |
+    | `apellido` | Your last name |
+    | `carrera` | Your degree program |
+    | `telefono` | Your phone number |
+    | `rol` | Your role (leave as the default) |
+    | `email` | Your institutional email address |
+    | `password` | Your chosen password |
+    | `confirm_password` | Repeat the password to confirm |
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    **Password requirements:**
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    - At least 8 characters
+    - At least one uppercase letter
+    - At least one lowercase letter
+    - At least one number
 
-### Step 3: Go live
+    <Warning>
+      New accounts are assigned the **Visitante** role automatically. You will not be able to submit loan requests until a lab administrator upgrades your account to **Estudiante**.
+    </Warning>
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    After submitting, you are redirected to the login page. Sign in with your new credentials.
+  </Step>
 
-## Next steps
+  <Step title="Request a student access upgrade">
+    Once signed in as a Visitante, navigate to `/solicitarAccesoMenu`.
 
-Now that you have your docs running, explore these key features:
+    Fill in the access request form:
 
-<CardGroup cols={2}>
+    - **Motivo (Reason)** — Explain why you need access. Include your course, semester, and intended use of the lab equipment.
+    - **Documento de identidad (ID document)** — Upload a photo or scan of your student ID or government-issued ID.
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+    Submit the form. Your request enters a queue for administrator review.
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+    <Note>
+      You will remain a Visitante until an administrator approves your request. Contact your lab coordinator if approval takes longer than expected.
+    </Note>
+  </Step>
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+  <Step title="Wait for administrator approval">
+    A lab administrator reviews your access request and either approves or rejects it.
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+    - **Approved** — Your role is upgraded to Estudiante. You can now submit loan requests.
+    - **Rejected** — You may resubmit with additional information at `/solicitarAccesoMenu`.
 
-</CardGroup>
+    Once approved, sign out and sign back in to ensure your session reflects the updated role.
+  </Step>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+  <Step title="Browse the equipment catalog">
+    Navigate to `/Catalogo` to view all available lab equipment.
+
+    Use the status filter to narrow results:
+
+    | Status | Meaning |
+    |---|---|
+    | `Disponible` | Equipment is ready to loan |
+    | `En uso` | Currently checked out by another user |
+
+    <Tip>
+      Filter by `Disponible` before adding items to your cart to avoid requesting equipment that cannot be approved immediately.
+    </Tip>
+  </Step>
+
+  <Step title="Add equipment to your cart or request directly">
+    From the catalog, you have two ways to request equipment:
+
+    **Option A — Cart**
+
+    Add one or more items to your cart, then submit a single combined loan request for all selected items.
+
+    **Option B — Direct request**
+
+    Click on any equipment item to go to its detail page, then navigate to `/solicitar/<IDequipo>` (where `<IDequipo>` is the equipment's ID number).
+
+    Fill in the loan request form:
+
+    | Field | Description |
+    |---|---|
+    | `motivo` | Reason for the loan (e.g., lab practice, research project) |
+    | `fecha_inicio` | Start date of the loan |
+    | `fecha_entrega` | Expected return date |
+    | `profesor` | Name of the supervising professor |
+    | `materia` | Course or subject name |
+
+    <Warning>
+      Make sure `fecha_entrega` is after `fecha_inicio`. Requests with invalid date ranges will not be accepted.
+    </Warning>
+  </Step>
+
+  <Step title="Submit and track your request">
+    Review the form details and submit your loan request.
+
+    After submission, go to `/perfilUsuario` to track the status of all your loan requests.
+
+    | Status | Meaning |
+    |---|---|
+    | `pendiente` | Awaiting administrator review |
+    | `activo` | Loan approved — pick up the equipment from the lab |
+    | `eliminado` | Request was rejected or removed by an admin |
+    | `Concluido` | Equipment returned and the loan is closed |
+
+    <Tip>
+      Include a clear, specific reason in the `motivo` field. Requests with vague descriptions are more likely to be delayed or rejected.
+    </Tip>
+  </Step>
+</Steps>
+
+## What's next?
+
+Once your loan is approved, coordinate with lab staff to pick up the equipment. Return it by the `fecha_entrega` date you specified in your request.
+
+You can view your full loan history — including active and past loans — at any time from `/perfilUsuario`.

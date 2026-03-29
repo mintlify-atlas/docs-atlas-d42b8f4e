@@ -1,0 +1,60 @@
+---
+title: 'Cart and checkout'
+description: 'Collect multiple items in your cart and submit them as a single grouped loan request.'
+---
+
+## Overview
+
+The cart lets you gather several pieces of equipment and submit one combined request instead of filing separate requests for each item. All items in the cart share the same approval workflow.
+
+<Note>
+  You must have `Estudiante` or `Administrador` permission to use the cart. `Visitante` accounts can browse the catalog but cannot add items.
+</Note>
+
+## Cart workflow
+
+<Steps>
+  <Step title="Add items to your cart">
+    From the catalog at `/Catalogo`, click **Add to cart** on any available item. This calls `GET /agregar-carrito/<IDequipo>`.
+
+    Two checks run automatically:
+    - The item must have `Estado = 'Disponible'`. Items that are `En uso` cannot be added.
+    - The item must not already be in your cart. Duplicate entries are blocked.
+  </Step>
+  <Step title="Continue browsing">
+    Keep adding items as needed. Each successful addition increments your cart count. You can add items from multiple catalog pages before checking out.
+  </Step>
+  <Step title="Review your cart">
+    Open your cart at `/Carrito`. The page lists every item you have added along with the current `estado_carrito` (cart status).
+  </Step>
+  <Step title="Remove unwanted items">
+    To remove a specific item before submitting, click **Remove** next to it. This calls `GET /quitar-carrito/<IDequipo>` and the item is dropped from the cart immediately.
+  </Step>
+  <Step title="Submit the cart as a request">
+    When you are ready, click **Submit request** on the cart page. This calls `GET /solicitar_todo_carrito`, which sets the status of every item in the cart to `Pendiente` and sends the grouped request to an administrator for review.
+  </Step>
+</Steps>
+
+## Cart status transitions
+
+The cart moves through the following states:
+
+| Status       | Meaning                                                                 |
+| ------------ | ----------------------------------------------------------------------- |
+| `En Carrito` | Items are saved in the cart but no request has been submitted yet       |
+| `Pendiente`  | The request has been submitted and is waiting for administrator approval |
+| Approved     | The administrator has approved the loan and the equipment can be picked up |
+
+<Note>
+  Status moves forward automatically when you submit the cart. It can only be manually reversed from `Pendiente` back to `En Carrito` by cancelling the pending request (see below).
+</Note>
+
+## Cancel a pending cart request
+
+If you submitted the cart but need to make changes before an administrator reviews it, you can revert the request.
+
+Navigate to `/cancelar_solicitud_carrito`. This sets all items back to `En Carrito` status so you can edit the cart contents and resubmit.
+
+<Warning>
+  Cancelling a pending cart request affects all items in the cart at once. You cannot selectively revert individual items from a submitted cart. If you only need to remove one item, cancel the entire cart, remove the item at `/quitar-carrito/<IDequipo>`, and resubmit.
+</Warning>

@@ -1,0 +1,112 @@
+---
+title: 'Permissions'
+description: 'Role-based access control in PrestamoEquipo: the three permission levels, what each role can do, how permissions are enforced at runtime, and how visitors upgrade to student access.'
+---
+
+PrestamoEquipo uses three discrete permission levels stored in the `usuario.Permiso` column and read from the server-side session on every request.
+
+## Permission levels
+
+| Role | `Permiso` value | How it is assigned |
+|------|-----------------|--------------------|
+| Visitor | `'Visitante'` | Set automatically on registration |
+| Student | `'Estudiante'` | Set by an admin after approving an access request |
+| Administrator | `'Administrador'` | Set manually in the database |
+
+## Permissions matrix
+
+| Capability | Visitante | Estudiante | Administrador |
+|------------|:---------:|:----------:|:-------------:|
+| Browse equipment catalog | Yes | Yes | Yes |
+| View own profile | Yes | Yes | Yes |
+| Submit access upgrade request | Yes | — | — |
+| Add/remove items from cart | — | Yes | Yes |
+| Submit loan requests (cart or single) | — | Yes | Yes |
+| Cancel own pending loan | — | Yes | Yes |
+| Return equipment | — | Yes | Yes |
+| Delete own loan record | — | Yes | Yes |
+| Admin dashboard | — | — | Yes |
+| View all loan requests | — | — | Yes |
+| Approve or reject loan requests | — | — | Yes |
+| View and manage inventory (CRUD) | — | — | Yes |
+| View and manage user accounts | — | — | Yes |
+| Approve or reject access upgrade requests | — | — | Yes |
+| View completed loan history | — | — | Yes |
+
+## Runtime enforcement
+
+Permission checks are applied using the `@verificar_permiso` decorator defined in `models/entities/Utils.py`. The decorator reads `session['permiso']` and compares it against the list of allowed roles passed as arguments.
+
+```python
+from models.entities.Utils import verificar_permiso
+
+@admin_bp.route('/Inventario')
+@verificar_permiso('Administrador')
+def inventario():
+    ...
+
+@equipos_bp.route('/Carrito')
+@verificar_permiso('Estudiante', 'Administrador')
+def carrito():
+    ...
+```
+
+If `session['permiso']` is not in the allowed roles, the decorator redirects the user to the equipment catalog (`equipos.Catalogo`) before the route handler executes.
+
+<Note>
+  `@verificar_permiso` re-reads `Permiso` from the database on every protected request and updates `session['permiso']` accordingly. This means a permission change takes effect immediately on the user's next page load — no re-login is required.
+</Note>
+
+`@verificar_permiso` stacks with `@login_required` from flask-login. Always apply `@login_required` first so unauthenticated requests are redirected to the login page before permission is checked.
+
+```python
+@admin_bp.route('/home')
+@login_required
+@verificar_permiso('Administrador')
+def home():
+    ...
+```
+
+## Access upgrade flow
+
+Visitors register with `Permiso = 'Visitante'` and can browse the catalog but cannot request equipment. To gain student access, they must submit a `SolicitudDeAcceso` and wait for admin approval.
+
+<Steps>
+  <Step title="Register an account">
+    The visitor submits the registration form at `/register`. The application creates a `usuario` row with `Permiso = 'Visitante'` and a corresponding `CarritoPedidos` row.
+  </Step>
+  <Step title="Submit an access request">
+    From the catalog or the access menu at `/solicitarAccesoMenu`, the visitor submits the form at `/SolicitarAcceso`, providing a reason (`Motivo`). A `SolicitudesDeAcceso` row is created with `Estado = 'Acceso'`.
+  </Step>
+  <Step title="Admin reviews the request">
+    An administrator sees the pending request in `/lista_solicitudes` on the admin dashboard. The admin can approve or reject it.
+  </Step>
+  <Step title="Admin approves the request">
+    On approval, the application updates two rows atomically:
+    - `SolicitudesDeAcceso.Estado` → `'Aprobado'`
+    - `usuario.Permiso` → `'Estudiante'`
+
+    The visitor's account now has student-level access.
+  </Step>
+  <Step title="Visitor logs in again">
+    At next login, `session['permiso']` is loaded as `'Estudiante'`. The user can now add items to their cart and submit loan requests.
+  </Step>
+</Steps>
+
+<Note>
+  If the admin rejects the request, `SolicitudesDeAcceso.Estado` is set to `'Rechazado'` and `usuario.Permiso` remains `'Visitante'`. The visitor may submit a new request with a different reason.
+</Note>
+
+## Administrator accounts
+
+There is no self-service path to the `'Administrador'` role. Administrator accounts must be created or promoted directly in the database:
+
+```sql
+UPDATE usuario
+SET Permiso = 'Administrador'
+WHERE IDusuario = <target_id>;
+```
+
+<Warning>
+  Granting `'Administrador'` permission gives full access to user management, inventory CRUD, and the ability to approve or reject any loan or access request. Assign this role only to trusted staff accounts.
+</Warning>

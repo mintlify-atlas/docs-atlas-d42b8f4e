@@ -1,0 +1,57 @@
+---
+title: 'Browsing the catalog'
+description: 'Explore available equipment, filter by status, and understand what each listing shows.'
+---
+
+## Access the catalog
+
+The full equipment catalog is available at `/Catalogo`. Any logged-in user, including `Visitante` accounts, can browse it.
+
+## Equipment status
+
+Each piece of equipment has a status that indicates whether it can be requested.
+
+<CardGroup cols={2}>
+  <Card title="Disponible" icon="circle-check">
+    The item is available and can be requested or added to your cart.
+  </Card>
+  <Card title="En uso" icon="circle-xmark">
+    The item is currently on loan to another user and cannot be requested until it is returned.
+  </Card>
+</CardGroup>
+
+## Filter by status
+
+Use the `filtro` query parameter to narrow the catalog to items in a specific state.
+
+| URL                              | Shows                        |
+| -------------------------------- | ---------------------------- |
+| `/Catalogo?filtro=todos`         | All equipment                |
+| `/Catalogo?filtro=Disponible`    | Available items only         |
+| `/Catalogo?filtro=En uso`        | Items currently on loan only |
+
+The default view (`todos`) lists every item regardless of status.
+
+## What each equipment card shows
+
+Each card in the catalog displays the key details you need to decide whether to request an item:
+
+- **Equipment name** — the identifier used across the system
+- **Status badge** — `Disponible` or `En uso`
+- **Description** — a brief summary of the item
+- **Request or cart controls** — visible only to users with `Estudiante` or `Administrador` permissions
+
+## Requesting from the catalog
+
+Access level determines what actions are available on each card.
+
+<Note>
+  `Visitante` accounts can view all catalog listings but the request and cart controls are not available. You must have `Estudiante` or `Administrador` permission to borrow equipment. See [Registration and access](/guides/registration-and-access) to learn how to request an upgrade.
+</Note>
+
+Users with `Estudiante` or `Administrador` permissions can:
+
+- Click **Request** to open a loan request form for a single item — this goes to `/solicitar/<IDequipo>`
+- Click **Add to cart** to collect multiple items before submitting a grouped request — this calls `/agregar-carrito/<IDequipo>`
+
+Both actions require the item to have `Disponible` status. Items marked `En uso` show their status but cannot be actioned until they are returned.

@@ -1,0 +1,105 @@
+---
+title: 'Registration and access'
+description: 'Create an account, understand permission levels, request equipment access, and manage your session.'
+---
+
+## Create an account
+
+New accounts are created at `/register`. Fill in all required fields and submit the form to get started.
+
+<Steps>
+  <Step title="Open the registration page">
+    Navigate to `/register` in your browser.
+  </Step>
+  <Step title="Fill in your personal information">
+    Complete all required fields:
+
+    | Field              | Description                              |
+    | ------------------ | ---------------------------------------- |
+    | `nombre`           | Your first name                          |
+    | `apellido`         | Your last name                           |
+    | `carrera`          | Your academic program or career          |
+    | `telefono`         | Your contact phone number                |
+    | `rol`              | Your role at the institution             |
+    | `email`            | Your institutional email address         |
+    | `password`         | Your chosen password (see rules below)   |
+    | `confirm_password` | Repeat your password to confirm          |
+  </Step>
+  <Step title="Meet the password requirements">
+    Your password must satisfy all of the following rules:
+
+    - At least **8 characters** long
+    - Contains at least one **uppercase** letter
+    - Contains at least one **lowercase** letter
+    - Contains at least one **digit**
+
+    <Warning>
+      Passwords that do not meet all four requirements will be rejected. You will need to correct the password before the form can be submitted.
+    </Warning>
+  </Step>
+  <Step title="Submit the form">
+    Once all fields are valid, submit the form. Your account is created with `Permiso = 'Visitante'` automatically.
+  </Step>
+</Steps>
+
+## Permission levels
+
+PrestamoEquipo uses three permission levels to control what each user can do.
+
+| Level          | Description                                                            |
+| -------------- | ---------------------------------------------------------------------- |
+| `Visitante`    | Can browse the catalog but cannot request or borrow equipment          |
+| `Estudiante`   | Can request equipment, manage loans, and use the cart                  |
+| `Administrador`| Full access, including approving requests and managing the system      |
+
+<Note>
+  All new accounts start as `Visitante`. You must request an upgrade to `Estudiante` before you can borrow equipment.
+</Note>
+
+## Request a permission upgrade
+
+To gain `Estudiante` access and start requesting equipment, you must submit an access request for an administrator to review.
+
+<Steps>
+  <Step title="Go to the access request page">
+    Navigate to `/solicitarAccesoMenu`. This page is available to all logged-in users regardless of their current permission level.
+  </Step>
+  <Step title="Upload your ID document">
+    Attach a photo of your student ID or other valid identification. The field accepts common image formats.
+  </Step>
+  <Step title="Write a reason for the request">
+    In the `motivo` field, briefly explain why you need equipment access — for example, the course you are enrolled in or the project you are working on.
+  </Step>
+  <Step title="Submit the request">
+    Send the form to `POST /SolicitarAcceso`. Your request enters a queue for administrator review.
+  </Step>
+</Steps>
+
+<Tip>
+  Write a clear and specific reason in the `motivo` field. Requests with vague explanations may take longer to process or be declined.
+</Tip>
+
+Once an administrator approves your request, your account permission is updated to `Estudiante` and you gain full access to request and borrow equipment.
+
+## Log in
+
+<Steps>
+  <Step title="Open the login page">
+    Navigate to `/login`.
+  </Step>
+  <Step title="Enter your credentials">
+    Provide the `email` and `password` you registered with, then submit the form.
+  </Step>
+</Steps>
+
+<Warning>
+  After several failed login attempts your session may be restricted. Make sure you are using the email address you registered with.
+</Warning>
+
+## Log out
+
+To end your session, navigate to `/logout`. Your session data is cleared immediately and you are redirected to the login page.
+
+<Tip>
+  Always log out when using a shared or public computer to prevent unauthorized access to your account.
+</Tip>

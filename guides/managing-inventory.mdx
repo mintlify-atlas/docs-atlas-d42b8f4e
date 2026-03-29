@@ -1,0 +1,177 @@
+---
+title: 'Managing inventory'
+description: 'Add, edit, and delete laboratory equipment records, manage equipment status, and upload equipment images.'
+---
+
+<Note>
+  Inventory management requires the **Administrator** permission.
+</Note>
+
+The inventory section at `/Inventario` is where you manage all equipment records in the laboratory system.
+
+## Browsing inventory
+
+Navigate to `/Inventario` to see the full equipment list. Use the `filtro` query parameter (or the filter controls in the UI) to narrow the list:
+
+| Filter value | What it shows |
+|---|---|
+| `todos` | All equipment regardless of status |
+| `Disponible` | Equipment available for new loans |
+| `En uso` | Equipment currently on loan or pending approval |
+
+## Equipment status
+
+Each piece of equipment has one of two status values:
+
+| Status | Meaning |
+|---|---|
+| `Disponible` | Available — can be assigned to a new loan request |
+| `En uso` | Currently on loan — cannot be assigned until the loan is closed |
+
+Status transitions are managed automatically when you approve or close loan requests. You can also set status manually when editing an equipment record.
+
+## Adding new equipment
+
+<Steps>
+  <Step title="Open the add equipment form">
+    Navigate to `/AgregarEquipo`. The form collects the basic fields needed to register a new item.
+  </Step>
+  <Step title="Fill in the required fields">
+    Complete the form fields listed below.
+  </Step>
+  <Step title="Upload an image (optional)">
+    Use the image upload control to attach a photo of the equipment. See [Image uploads](#image-uploads) for details.
+  </Step>
+  <Step title="Submit the form">
+    Submit to `/AgregarEquipoAplica`. The record is inserted into the `equiposLab` table and immediately appears in the inventory list.
+  </Step>
+</Steps>
+
+### Fields on the add equipment form
+
+<ParamField path="body.nombre" type="string" required>
+  The display name of the equipment item.
+</ParamField>
+
+<ParamField path="body.descripcion" type="string">
+  A general description of the equipment and its purpose.
+</ParamField>
+
+<ParamField path="body.estado" type="string" required>
+  Initial status of the equipment. Typically set to `Disponible` for new items.
+</ParamField>
+
+<ParamField path="body.fechaAdquisicion" type="string" required>
+  The date the equipment was acquired. Use the date picker in the form.
+</ParamField>
+
+<ParamField path="body.ubicacion" type="string">
+  Physical location of the equipment within the laboratory.
+</ParamField>
+
+<ParamField path="body.imagen" type="string">
+  Path or filename of the uploaded equipment image.
+</ParamField>
+
+## Editing equipment
+
+<Steps>
+  <Step title="Find the equipment record">
+    Go to `/Inventario` and locate the item you want to update.
+  </Step>
+  <Step title="Open the edit form">
+    Navigate to `/EditarS/<IDequipo>`, replacing `<IDequipo>` with the equipment's ID. The form pre-populates all current values.
+  </Step>
+  <Step title="Update the fields">
+    Modify any of the fields listed below. All fields from the add form are available here, plus the extended technical fields.
+  </Step>
+  <Step title="Save changes">
+    Submit to `/Editar/<IDequipo>`. The record in `equiposLab` is updated immediately.
+  </Step>
+</Steps>
+
+### Full set of editable fields
+
+<ParamField path="body.nombre" type="string" required>
+  Display name of the equipment.
+</ParamField>
+
+<ParamField path="body.estado" type="string" required>
+  Current status: `Disponible` or `En uso`.
+</ParamField>
+
+<ParamField path="body.descripcion" type="string">
+  General description of the equipment.
+</ParamField>
+
+<ParamField path="body.fechaAdquisicion" type="string">
+  Original acquisition date.
+</ParamField>
+
+<ParamField path="body.ubicacion" type="string">
+  Physical storage location.
+</ParamField>
+
+<ParamField path="body.imagen" type="string">
+  Equipment image filename or path.
+</ParamField>
+
+<ParamField path="body.tipo" type="string">
+  Equipment category or type classification.
+</ParamField>
+
+<ParamField path="body.ci" type="string">
+  CI (identification) number associated with the equipment.
+</ParamField>
+
+<ParamField path="body.numeroInventario" type="string">
+  Official inventory registration number.
+</ParamField>
+
+<ParamField path="body.descripcionTecnica" type="string">
+  Technical specifications and detailed description.
+</ParamField>
+
+<ParamField path="body.marca" type="string">
+  Manufacturer or brand name.
+</ParamField>
+
+<ParamField path="body.modelo" type="string">
+  Model name or number.
+</ParamField>
+
+<ParamField path="body.numeroSerie" type="string">
+  Serial number of the equipment unit.
+</ParamField>
+
+<ParamField path="body.mantenimientosAnuales" type="number">
+  Number of scheduled maintenance sessions per year.
+</ParamField>
+
+## Deleting equipment
+
+<Warning>
+  Deleting equipment is irreversible. The system performs a **cascade delete**: all observations and loan requests linked to the equipment are permanently removed before the equipment record itself is deleted.
+</Warning>
+
+<Steps>
+  <Step title="Locate the equipment record">
+    Find the item in `/Inventario`.
+  </Step>
+  <Step title="Initiate deletion">
+    Navigate to `/EliminarEquipo/<IDequipo>`. No confirmation form is shown — the deletion executes immediately.
+  </Step>
+  <Step title="Verify removal">
+    Return to `/Inventario` to confirm the equipment no longer appears in the list.
+  </Step>
+</Steps>
+
+## Image uploads
+
+Both the add and edit forms include an image upload control. When you upload an image:
+
+- The file is saved to `static/uploads/equipos/` and the path is stored in the `Imagen` column of `equiposLab`.
+- Accepted formats: `.jpg`, `.jpeg`, `.png`. Other formats are rejected with an error message.
+- Maximum file size: **2 MB**.
+- Images are automatically resized to fit within 800×800 pixels and re-saved as JPEG with quality 85.
+- To replace an existing image, open the edit form and upload a new file. The previous path reference is overwritten.

@@ -1,0 +1,67 @@
+---
+title: 'Admin dashboard'
+description: 'Overview of the administrator dashboard, key metrics, and navigation to all admin sections.'
+---
+
+<Note>
+  All pages described here require the **Administrator** permission. Users without this role are redirected away from these routes automatically.
+</Note>
+
+The admin dashboard at `/home` is the central hub for monitoring laboratory activity. It displays four live counters that reflect the current state of equipment and requests.
+
+## Dashboard stat counters
+
+<CardGroup cols={2}>
+  <Card title="Active loans" icon="box">
+    The number of loan requests with `Estado = 'activo'`. Each represents a piece of equipment currently checked out by a student.
+  </Card>
+  <Card title="Pending requests" icon="clock">
+    The number of loan requests with `Estado = 'pendiente'`. These require administrator action — approve or reject.
+  </Card>
+  <Card title="Total observations" icon="message-lines">
+    The cumulative count of observations and notes logged across all equipment and loans.
+  </Card>
+  <Card title="Available equipment" icon="boxes-stacking">
+    Equipment units with `Estado = 'Disponible'`. Only available equipment can be assigned to new loan requests.
+  </Card>
+</CardGroup>
+
+## Navigating admin sections
+
+From the dashboard you can reach every administrative area:
+
+| Section | Route | Description |
+|---|---|---|
+| Active loans | `/lista_Pedidos` | View and close currently active loans |
+| Pending requests | `/lista_solicitudes` | Approve or reject loan and access requests |
+| Inventory | `/Inventario` | Browse, add, edit, and delete equipment |
+| Users | `/ListaUsuario` | Manage user accounts and permissions |
+| Loan history | `/Historial` | Full historical record of all loans |
+
+## Loan history
+
+The loan history page at `/Historial` provides a complete audit trail of every loan that has passed through the system.
+
+### Filtering history records
+
+The history view accepts a `filtro` query parameter. Use the filter controls in the UI to narrow results:
+
+| Filter value | What it shows |
+|---|---|
+| `todos` | All loan records regardless of status |
+| `pendiente` | Requests awaiting admin review |
+| `activo` | Currently active loans |
+| `concluido` | Completed loans (equipment returned) |
+| `eliminado` | Rejected or admin-closed records |
+| `cancelado` | Cancelled by the student |
+| `rechazado` | Explicitly rejected by an admin |
+
+### Using history to track equipment utilization
+
+- **Identify high-demand items** by sorting or filtering for equipment that appears most frequently in the history.
+- **Audit overdue returns** by reviewing loans where `Estado` changed from `activo` without a corresponding close action.
+- **Verify access changes** by checking when a user's permission level was upgraded alongside related loan activity.
+
+<Tip>
+  Use the `todos` filter first to see the full picture, then apply a more specific filter to narrow down the records you need.
+</Tip>
